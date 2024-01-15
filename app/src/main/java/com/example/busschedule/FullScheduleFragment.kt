@@ -68,9 +68,12 @@ class FullScheduleFragment : Fragment() {
         recyclerView.adapter = adapter
 
         //Pasamos la lista al adaptador. Por ahora en GlobalScope.
-        GlobalScope.launch(Dispatchers.IO) {
+        //IMPORTANTE: El Codelab propone hacerlo con Dispatchers.UI, pero rompe
+        GlobalScope.launch(Dispatchers.Default) {
             adapter.submitList(viewModel.fullSchedule())
         }
+
+
     }
 
     override fun onDestroyView() {
