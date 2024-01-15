@@ -21,7 +21,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.busschedule.databinding.FullScheduleFragmentBinding
@@ -63,14 +65,15 @@ class FullScheduleFragment : Fragment() {
             //Al hacer click, lanzaremos la navegación con el Navigation Component
             val action =
                 FullScheduleFragmentDirections.actionFullScheduleFragmentToStopScheduleFragment(it.stopName)
-            view.findNavController().navigate(action)
+            findNavController().navigate(action)
         }
         recyclerView.adapter = adapter
 
-        //Pasamos la lista al adaptador. Por ahora en GlobalScope.
-        //IMPORTANTE: El Codelab propone hacerlo con Dispatchers.UI, pero rompe
-        GlobalScope.launch(Dispatchers.Default) {
-            adapter.submitList(viewModel.fullSchedule())
+        //Pasamos la lista al adaptador, recolectada desde un Flow
+        lifecycle.coroutineScope.launch{
+            viewModel.fullSchedule().collect{
+                adapter.submitList(it)
+            }
         }
 
 
