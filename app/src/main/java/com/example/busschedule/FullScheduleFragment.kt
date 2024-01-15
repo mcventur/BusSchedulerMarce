@@ -70,10 +70,14 @@ class FullScheduleFragment : Fragment() {
         recyclerView.adapter = adapter
 
         //Pasamos la lista al adaptador, recolectada desde un Flow
-        lifecycle.coroutineScope.launch{
-            viewModel.fullSchedule().collect{
-                adapter.submitList(it)
-            }
+//        lifecycle.coroutineScope.launch{
+//            viewModel.fullSchedule().observe(viewLifecycleOwner){
+//                adapter.submitList(it)
+//            }
+//        }
+
+        viewModel.fullSchedule().observe(viewLifecycleOwner){
+            adapter.submitList(it)
         }
 
 
