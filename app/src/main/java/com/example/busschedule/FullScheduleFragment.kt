@@ -20,17 +20,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.busschedule.databinding.FullScheduleFragmentBinding
+import com.example.busschedule.viewmodels.BusScheduleViewModel
+import com.example.busschedule.viewmodels.BusSchedulerViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class FullScheduleFragment: Fragment() {
+class FullScheduleFragment : Fragment() {
 
     private var _binding: FullScheduleFragmentBinding? = null
 
     private val binding get() = _binding!!
 
     private lateinit var recyclerView: RecyclerView
+
+    private val viewModel: BusScheduleViewModel by activityViewModels {
+        BusSchedulerViewModelFactory(
+            (activity?.application as BusScheduleApplication).database.scheduleDao()
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +59,18 @@ class FullScheduleFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val adapter = BusStopAdapter {
+            //Al hacer click, lanzaremos la navegación con el Navigation Component
+            val action =
+                FullScheduleFragmentDirections.actionFullScheduleFragmentToStopScheduleFragment(it.stopName)
+            view.findNavController().navigate(action)
+        }
+        recyclerView.adapter = adapter
+
+        //Pasamos la lista al adaptador. Por ahora en GlobalScope.
+        GlobalScope.launch(Dispatchers.IO) {
+            adapter.submitList(viewModel.fullSchedule())
+        }
     }
 
     override fun onDestroyView() {

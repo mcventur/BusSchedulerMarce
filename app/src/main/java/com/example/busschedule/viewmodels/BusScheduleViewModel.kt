@@ -9,17 +9,16 @@ class BusScheduleViewModel(private val scheduleDao: ScheduleDao) : ViewModel() {
     fun fullSchedule(): List<Schedule> = scheduleDao.getAll()
 
     fun scheduleForStopName(name: String): List<Schedule> = scheduleDao.getStopByName(name)
+}
 
-    //Necesitamos este factory para poder crear intancias del viewmodel con el dao
-    //El codelab lo propone en una clase aparte
-    class BusSchedulerViewModelFactory(private val scheduleDao: ScheduleDao) :
-        ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(scheduleDao::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return BusScheduleViewModel(scheduleDao) as T
-            }
-            throw IllegalArgumentException("UNKNOWN VIEW MODEL CLASS")
+//Necesitamos este factory para poder crear intancias del viewmodel con el dao
+class BusSchedulerViewModelFactory(private val scheduleDao: ScheduleDao) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(BusScheduleViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BusScheduleViewModel(scheduleDao) as T
         }
+        throw IllegalArgumentException("UNKNOWN VIEW MODEL CLASS")
     }
 }
